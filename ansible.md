@@ -128,7 +128,7 @@ Ansible can orchestrate complex workflows and automate deployment processes, mak
 
 - Copy the public key (id_rsa.pub) from the control node to the remote host (the machine you want to manage with Ansible).
 
-- ssh-copy-id username@remote_host
+- ssh-copy-id username@remote_host (OR) paste the Public key of ansible control node to authorised_keys of the remote nodes 
 - Replace username with your username on the remote host and remote_host with the IP address or hostname of the remote host.
 - You'll be prompted to enter the password for the remote user.
 - Once authenticated, your public key will be added to the authorized_keys file on the remote host, allowing SSH key-based authentication.
