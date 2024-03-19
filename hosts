@@ -1,0 +1,4 @@
+40.71.183.134 ansible_user=azureuser
+
+[web]
+40.71.27.31 ansible_user=node2
