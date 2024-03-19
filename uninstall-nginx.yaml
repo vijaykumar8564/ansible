@@ -1,0 +1,16 @@
+---
+- name: Uninstall Nginx
+  hosts: all
+  become: true
+  tasks:
+    - name: Remove Nginx package
+      package:
+        name: nginx
+        state: absent
+
+    - name: Remove Nginx configuration directory
+      file:
+        path: /etc/nginx
+        state: absent
+      ignore_errors: yes
+
