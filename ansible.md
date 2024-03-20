@@ -196,11 +196,11 @@ Replace remote_host with the IP address or hostname of the remote host, and user
 
 #### Here's an example directory structure for an Ansible role named example_role:
 ```python
-example_role/
+webserver/
 ├── defaults/
 │   └── main.yml
 ├── files/
-│   └── some_file.txt
+│   └── index.html
 ├── handlers/
 │   └── main.yml
 ├── meta/
@@ -208,8 +208,121 @@ example_role/
 ├── tasks/
 │   └── main.yml
 ├── templates/
-│   └── config.j2
+│   └── nginx.conf.j2
 └── vars/
     └── main.yml
+```
+
+##### defaults/main.yml:
+
+```python
+nginx_package: nginx
+nginx_service: nginx
+```
+##### files/index.html:
+
+```python
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to My Website</title>
+</head>
+<body>
+    <h1>Welcome to My Website</h1>
+    <p>This is a placeholder for your content.</p>
+</body>
+</html>
+
+```
+
+##### handlers/main.yml:
+
+```python
+- name: restart nginx
+  service:
+    name: "{{ nginx_service }}"
+    state: restarted
+
+```
+
+##### meta/main.yml:
+
+```python
+dependencies:
+  - role: geerlingguy.repo-epel
+
+```
+##### tasks/main.yml:
+
+```python
+- name: Install Nginx package
+  yum:
+    name: "{{ nginx_package }}"
+    state: present
+
+- name: Copy Nginx configuration file
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+  notify: restart nginx
+
+- name: Copy index.html
+  copy:
+    src: index.html
+    dest: /usr/share/nginx/html/index.html
+
+```
+
+##### templates/nginx.conf.j2 :
+
+```python
+worker_processes 1;
+error_log /var/log/nginx/error.log warn;
+pid /var/run/nginx.pid;
+
+events {
+    worker_connections 1024;
+}
+
+http {
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+
+    log_format main '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log /var/log/nginx/access.log main;
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+
+    include /etc/nginx/conf.d/*.conf;
+
+    server {
+        listen 80;
+        server_name localhost;
+
+        location / {
+            root /usr/share/nginx/html;
+            index index.html;
+        }
+
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+            root /usr/share/nginx/html;
+        }
+    }
+}
+
+```
+##### vars/main.yml :
+
+```python
+nginx_package: nginx
+nginx_service: nginx
 
 ```
